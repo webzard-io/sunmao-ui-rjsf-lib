@@ -1,21 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { implementRuntimeComponent } from "@sunmao-ui/runtime";
 import { Type } from "@sinclair/typebox";
 import { css } from "@emotion/css";
-import Form from "@rjsf/bootstrap-4";
+import Form from "@rjsf/chakra-ui";
+import { Box, Button } from "@chakra-ui/react";
 import { FALLBACK_METADATA } from "../sunmao-helper";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 const StateSchema = Type.Object({
-  value: Type.String(),
+  value: Type.Any(),
 });
 
 const PropsSchema = Type.Object({
   schema: Type.Any({
-    // widget: "expression",
+    title: "JSON Schema",
+    widget: "expression",
+    category: "Basic",
   }),
   uiSchema: Type.Any({
-    // widget: "expression",
+    title: "UI Schema",
+    widget: "expression",
+    category: "Basic",
+  }),
+  defaultFormData: Type.Any({
+    title: "Default Form Data",
+    widget: "expression",
+    category: "Basic",
+  }),
+  submitText: Type.String({
+    title: "Submit Text",
+    category: "Display",
+  }),
+  submitting: Type.Boolean({
+    title: "Submitting",
+    category: "Display",
+  }),
+  omitExtraData: Type.Boolean({
+    title: "Omit Extra Data",
+    default: false,
+    category: "Advance",
   }),
 });
 
@@ -81,7 +103,6 @@ export default implementRuntimeComponent({
         },
       },
     },
-    exampleSize: [3, 6],
   },
   spec: {
     properties: PropsSchema,
@@ -92,13 +113,44 @@ export default implementRuntimeComponent({
     events: ["onSubmit"],
   },
 })((props) => {
-  const { schema, uiSchema, customStyle } = props;
+  const {
+    schema,
+    uiSchema,
+    customStyle,
+    mergeState,
+    callbackMap,
+    elementRef,
+    omitExtraData,
+    defaultFormData,
+    submitText = "Submit",
+    submitting,
+  } = props;
+  const [formData, setFormData] = useState(defaultFormData);
+  useEffect(() => {
+    mergeState({
+      value: formData,
+    });
+  }, [formData]);
 
   return (
-    <Form
-      schema={schema}
-      uiSchema={uiSchema}
-      className={css(customStyle?.content)}
-    />
+    <div ref={elementRef}>
+      <Form
+        schema={schema}
+        uiSchema={uiSchema}
+        className={css(customStyle?.content)}
+        onSubmit={() => {
+          callbackMap?.onSubmit();
+        }}
+        formData={formData}
+        onChange={(e) => setFormData(e.formData)}
+        omitExtraData={omitExtraData}
+      >
+        <Box marginTop={3}>
+          <Button type="submit" variant="solid" isLoading={submitting}>
+            {submitText}
+          </Button>
+        </Box>
+      </Form>
+    </div>
   );
 });
