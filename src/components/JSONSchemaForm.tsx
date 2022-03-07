@@ -3,7 +3,7 @@ import { implementRuntimeComponent } from "@sunmao-ui/runtime";
 import { Type } from "@sinclair/typebox";
 import { css } from "@emotion/css";
 import Form from "@rjsf/chakra-ui";
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, ChakraProvider } from "@chakra-ui/react";
 import { FALLBACK_METADATA } from "../sunmao-helper";
 
 const StateSchema = Type.Object({
@@ -134,23 +134,25 @@ export default implementRuntimeComponent({
 
   return (
     <div ref={elementRef}>
-      <Form
-        schema={schema}
-        uiSchema={uiSchema}
-        className={css(customStyle?.content)}
-        onSubmit={() => {
-          callbackMap?.onSubmit();
-        }}
-        formData={formData}
-        onChange={(e) => setFormData(e.formData)}
-        omitExtraData={omitExtraData}
-      >
-        <Box marginTop={3}>
-          <Button type="submit" variant="solid" isLoading={submitting}>
-            {submitText}
-          </Button>
-        </Box>
-      </Form>
+      <ChakraProvider>
+        <Form
+          schema={schema}
+          uiSchema={uiSchema}
+          className={css(customStyle?.content)}
+          onSubmit={() => {
+            callbackMap?.onSubmit();
+          }}
+          formData={formData}
+          onChange={(e) => setFormData(e.formData)}
+          omitExtraData={omitExtraData}
+        >
+          <Box marginTop={3}>
+            <Button type="submit" variant="solid" isLoading={submitting}>
+              {submitText}
+            </Button>
+          </Box>
+        </Form>
+      </ChakraProvider>
     </div>
   );
 });
